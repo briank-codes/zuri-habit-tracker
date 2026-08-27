@@ -1,0 +1,126 @@
+/* ==========================================================
+   Zuri — Editorial Habit Tracker: Design Tokens
+   Drop into your global stylesheet. Pair with Tailwind config below.
+   ========================================================== */
+
+:root {
+  /* --- surfaces --- */
+  --cream: #F4F3EF;     /* page background */
+  --card: #FFFFFF;      /* card / container background */
+  --card-90: rgba(255, 255, 255, 0.9); /* semi-transparent card variant */
+  --border: #E4E1D8;    /* hairline borders, stone-200 equivalent */
+
+  /* --- text --- */
+  --ink: #1C1C1C;        /* body text, dark charcoal */
+  --muted: #8A8778;      /* captions, eyebrows, secondary text */
+  --off-black: #111111;  /* solid buttons */
+
+  /* --- accents (status / emphasis) --- */
+  --moss: #4B5E45;         /* italic emphasis word, "today" ring, done-day cells */
+  --moss-tint: #E7EBE3;    /* done-day cell background */
+  --ochre: #9C7A3C;        /* streak badge text */
+  --ochre-tint: #F2EAD9;   /* streak badge background */
+  --danger: #B4433A;       /* delete hover state */
+
+  --off-black-contrast: #FFFFFF; /* text color to use on top of --off-black */
+
+  /* --- radius scale --- */
+  --radius-sm: 8px;    /* inputs, small controls */
+  --radius-md: 12px;   /* week-cell buttons */
+  --radius-lg: 18px;   /* habit cards */
+  --radius-xl: 20px;   /* progress card, add panel */
+  --radius-pill: 9999px; /* buttons, badges */
+
+  /* --- type scale --- */
+  --font-display: 'Instrument Serif', 'Playfair Display', Georgia, serif;
+  --font-body: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+
+  --text-headline: 2.6rem;   /* hero heading */
+  --text-stat: 4.2rem;       /* big progress figure */
+  --text-habit-name: 1.3rem; /* habit card title */
+  --text-body: 15px;         /* base body copy */
+  --text-caption: 12px;      /* captions, section labels */
+  --text-badge: 11px;        /* pill badge text */
+
+  --leading-tight: 1.12;  /* headings */
+  --leading-body: 1.5;    /* body copy */
+
+  --tracking-tight: -0.02em; /* headings */
+  --tracking-wide: 0.05em;   /* badges, uppercase labels */
+  --tracking-mono: 0.08em;   /* eyebrows */
+}
+
+/* ==========================================================
+   Dark mode overrides — set data-theme="dark" on <html>
+   ========================================================== */
+
+[data-theme="dark"] {
+  --cream: #17181A;
+  --card: #212325;
+  --border: #35373A;
+  --ink: #EDEBE4;
+  --muted: #94918A;
+  --off-black: #EDEBE4;
+  --off-black-contrast: #17181A;
+  --moss: #7FA372;
+  --moss-tint: #223226;
+  --ochre: #D3A75C;
+  --ochre-tint: #33291A;
+}
+
+html { color-scheme: light dark; }
+
+/* ==========================================================
+   Base element mapping (optional — remove if you're Tailwind-only)
+   ========================================================== */
+
+body {
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+}
+
+.font-display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: var(--tracking-tight);
+  line-height: var(--leading-tight);
+}
+
+.font-mono-label {
+  font-family: var(--font-mono);
+  letter-spacing: var(--tracking-mono);
+  text-transform: uppercase;
+}
+
+.badge {
+  border-radius: var(--radius-pill);
+  font-size: var(--text-badge);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+  padding: 6px 12px;
+}
+
+.badge-completed { background: var(--ink); color: var(--cream); }
+.badge-streak     { background: var(--ochre-tint); color: var(--ochre); }
+.badge-pending    { background: transparent; border: 1px solid var(--border); color: var(--muted); }
+
+.btn-pill {
+  border-radius: var(--radius-pill);
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-body);
+}
+
+.btn-dark  { background: var(--off-black); color: var(--off-black-contrast); font-weight: 600; padding: 11px 20px; font-size: 13px; }
+.btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--ink); font-weight: 500; padding: 10px 18px; font-size: 13px; }
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}

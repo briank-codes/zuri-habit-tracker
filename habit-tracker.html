@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zuri — Habit Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<script>
+  // Apply saved theme before paint to avoid a flash of the wrong theme.
+  (function () {
+    var saved = localStorage.getItem('zuri-habit-tracker-theme');
+    var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    var theme = saved || (prefersDark ? 'dark' : 'light');
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
+<style>
+  :root {
+    --cream: #F4F3EF;
+    --card: #FFFFFF;
+    --border: #E4E1D8;
+    --ink: #1C1C1C;
+    --muted: #8A8778;
+    --off-black: #111111;
+    --off-black-contrast: #FFFFFF;
+    --moss: #4B5E45;
+    --moss-tint: #E7EBE3;
+    --ochre: #9C7A3C;
+    --ochre-tint: #F2EAD9;
+  }
+
+  [data-theme="dark"] {
+    --cream: #17181A;
+    --card: #212325;
+    --border: #35373A;
+    --ink: #EDEBE4;
+    --muted: #94918A;
+    --off-black: #EDEBE4;
+    --off-black-contrast: #17181A;
+    --moss: #7FA372;
+    --moss-tint: #223226;
+    --ochre: #D3A75C;
+    --ochre-tint: #33291A;
+  }
+
+  html { color-scheme: light dark; }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--cream);
+    color: var(--ink);
+    font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+    padding: 56px 20px 100px;
+    min-height: 100vh;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+
+  .mono {
+    font-family: 'IBM Plex Mono', monospace;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .wrap { max-width: 640px; margin: 0 auto; }
+
+  /* ---------- header ---------- */
+
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  .eyebrow {
+    font-size: 11px;
+    color: var(--muted);
+    display: block;
+  }
+
+  .theme-toggle {
+    width: 34px;
+    height: 34px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--ink);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.15s ease, transform 0.15s ease, background 0.2s ease;
+  }
+
+  .theme-toggle:hover {
+    border-color: var(--moss);
+    transform: scale(1.05);
+  }
+
+  .theme-toggle:active {
+    transform: scale(0.92);
+  }
+
+  .theme-toggle svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .theme-toggle .icon-sun,
+  .theme-toggle .icon-moon {
+    display: none;
+  }
+
+  [data-theme="light"] .theme-toggle .icon-sun,
+  [data-theme="dark"] .theme-toggle .icon-moon {
+    display: block;
+  }
+
+  h1.headline {
+    font-family: 'Instrument Serif', 'Playfair Display', Georgia, serif;
+    font-weight: 400;
+    font-size: 2.6rem;
+    line-height: 1.12;
+    letter-spacing: -0.02em;
+    margin: 0 0 40px;
+    max-width: 480px;
+  }
+
+  h1.headline em {
+    font-style: italic;
+    color: var(--moss);
+  }
+
+  /* ---------- progress card (signature element) ---------- */
+
+  .progress-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 32px 30px;
+    margin-bottom: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  .progress-stat {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .progress-stat .figure {
+    font-family: 'Instrument Serif', Georgia, serif;
+    font-size: 4.2rem;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    font-weight: 400;
+  }
+
+  .progress-stat .caption {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 8px;
+  }
+
+  .day-dots {
+    display: flex;
+    gap: 10px;
+  }
+
+  .day-dot-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .day-dot-col span {
+    font-size: 10px;
+    color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  .day-dot {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    background: transparent;
+  }
+
+  .day-dot.filled {
+    background: var(--ink);
+    border-color: var(--ink);
+  }
+
+  .day-dot.today {
+    border-color: var(--moss);
+    border-width: 2px;
+  }
+
+  /* ---------- add habit ---------- */
+
+  .add-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+
+  .section-label {
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .btn-pill {
+    border-radius: 9999px;
+    border: none;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .btn-dark {
+    background: var(--off-black);
+    color: var(--off-black-contrast);
+    padding: 11px 20px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--ink);
+    padding: 10px 18px;
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .add-panel {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 22px 24px;
+    margin-bottom: 20px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .add-panel input {
+    flex: 1;
+    min-width: 160px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 11px 14px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    background: var(--cream);
+    color: var(--ink);
+  }
+
+  .add-panel input:focus { outline: none; border-color: var(--ink); }
+
+  /* ---------- habit list ---------- */
+
+  .habit-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 20px 22px;
+    margin-bottom: 12px;
+  }
+
+  .habit-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+
+  .habit-name {
+    font-family: 'Instrument Serif', Georgia, serif;
+    font-size: 1.3rem;
+    letter-spacing: -0.01em;
+  }
+
+  .habit-schedule {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 3px;
+  }
+
+  .badge {
+    border-radius: 9999px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 6px 12px;
+    white-space: nowrap;
+  }
+
+  .badge-completed { background: var(--ink); color: var(--cream); }
+  .badge-streak { background: var(--ochre-tint); color: var(--ochre); }
+  .badge-pending { background: transparent; border: 1px solid var(--border); color: var(--muted); }
+
+  .habit-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+  }
+
+  .week-track {
+    display: flex;
+    gap: 6px;
+  }
+
+  .week-cell {
+    width: 24px;
+    height: 24px;
+    border-radius: 7px;
+    border: 1px solid var(--border);
+    background: var(--cream);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  .week-cell.done {
+    background: var(--moss-tint);
+    border-color: var(--moss);
+    color: var(--moss);
+  }
+
+  .delete-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 13px;
+    padding: 4px;
+  }
+
+  .delete-btn:hover { color: #B4433A; }
+
+  .empty-state {
+    text-align: center;
+    color: var(--muted);
+    font-size: 14px;
+    padding: 50px 20px;
+    font-style: italic;
+    font-family: 'Instrument Serif', Georgia, serif;
+    font-size: 1.2rem;
+  }
+
+  @media (max-width: 640px) {
+    body { padding: 40px 16px 80px; }
+    .progress-card { flex-direction: column; align-items: flex-start; padding: 26px 22px; }
+    h1.headline { font-size: 2.1rem; margin-bottom: 28px; }
+    .progress-stat .figure { font-size: 3.2rem; }
+    .day-dots { gap: 7px; }
+    .habit-card { padding: 16px 16px; }
+    .week-cell { width: 22px; height: 22px; }
+  }
+
+  @media (max-width: 380px) {
+    h1.headline { font-size: 1.7rem; }
+    .progress-stat .figure { font-size: 2.6rem; }
+    .day-dot { width: 12px; height: 12px; }
+    .habit-name { font-size: 1.1rem; }
+    .add-panel { padding: 18px; }
+    .add-panel input { min-width: 100%; }
+    .habit-top { flex-wrap: wrap; }
+  }
+
+  @media (min-width: 900px) {
+    .wrap { max-width: 720px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header>
+    <div class="header-top">
+      <span class="eyebrow mono" id="today-label"></span>
+      <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+      </button>
+    </div>
+    <h1 class="headline">Daily consistency, <em>tracked</em> simply.</h1>
+  </header>
+
+  <div class="progress-card">
+    <div class="progress-stat">
+      <div class="figure" id="week-percent">0%</div>
+      <div class="caption">This week's consistency</div>
+    </div>
+    <div class="day-dots" id="day-dots"></div>
+  </div>
+
+  <div class="add-row">
+    <span class="section-label">Your habits</span>
+    <button class="btn-pill btn-dark" id="add-habit-btn">+ New habit</button>
+  </div>
+
+  <div class="add-panel" id="add-panel" hidden>
+    <input type="text" id="f-name" placeholder="Habit name, e.g. Read 10 pages" maxlength="40">
+    <button class="btn-pill btn-ghost" id="cancel-add">Cancel</button>
+    <button class="btn-pill btn-dark" id="save-add">Add</button>
+  </div>
+
+  <div id="habits-container"></div>
+
+</div>
+
+<script>
+(function () {
+  const DAY_LABELS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+
+  // in-memory only — wire this to localStorage.setItem/getItem
+  // once you drop this file outside the preview environment.
+  let habits = [
+    { id: 1, name: 'Drink 2L of water', week: [true, true, false, true, false, false, false] },
+    { id: 2, name: 'Read 10 pages', week: [true, true, true, true, true, false, false] },
+    { id: 3, name: 'Morning stretch', week: [false, false, false, false, false, false, false] }
+  ];
+
+  const todayIdx = (new Date().getDay() + 6) % 7; // Monday = 0
+
+  const $ = (sel) => document.querySelector(sel);
+  const container = $('#habits-container');
+
+  function todayLabel() {
+    const d = new Date();
+    return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }).toUpperCase();
+  }
+
+  function computeStreak(week) {
+    let streak = 0;
+    for (let i = todayIdx; i >= 0; i--) {
+      if (week[i]) streak++; else break;
+    }
+    return streak;
+  }
+
+  function badgeFor(habit) {
+    if (habit.week[todayIdx]) return { cls: 'badge-completed', label: 'Completed' };
+    const streak = computeStreak(habit.week);
+    if (streak >= 3) return { cls: 'badge-streak', label: `Streak ${streak} days` };
+    return { cls: 'badge-pending', label: 'Pending' };
+  }
+
+  function renderDayDots() {
+    const el = $('#day-dots');
+    el.innerHTML = '';
+    for (let i = 0; i < 7; i++) {
+      const doneAny = habits.some(h => h.week[i]);
+      const col = document.createElement('div');
+      col.className = 'day-dot-col';
+      col.innerHTML = `
+        <div class="day-dot ${doneAny ? 'filled' : ''} ${i === todayIdx ? 'today' : ''}"></div>
+        <span>${DAY_LABELS[i]}</span>
+      `;
+      el.appendChild(col);
+    }
+  }
+
+  function renderStats() {
+    const total = habits.length * 7;
+    const done = habits.reduce((sum, h) => sum + h.week.filter(Boolean).length, 0);
+    const pct = total ? Math.round((done / total) * 100) : 0;
+    $('#week-percent').textContent = pct + '%';
+  }
+
+  function renderHabits() {
+    container.innerHTML = '';
+
+    if (habits.length === 0) {
+      container.innerHTML = '<div class="empty-state">Nothing tracked yet — add your first habit.</div>';
+      return;
+    }
+
+    habits.forEach(habit => {
+      const badge = badgeFor(habit);
+      const card = document.createElement('div');
+      card.className = 'habit-card';
+      card.innerHTML = `
+        <div class="habit-top">
+          <div>
+            <div class="habit-name">${habit.name}</div>
+            <div class="habit-schedule mono">Daily</div>
+          </div>
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span class="badge ${badge.cls}">${badge.label}</span>
+            <button class="delete-btn" data-id="${habit.id}" aria-label="Delete habit">✕</button>
+          </div>
+        </div>
+        <div class="habit-bottom">
+          <div class="week-track">
+            ${habit.week.map((done, i) => `
+              <button class="week-cell ${done ? 'done' : ''}" data-id="${habit.id}" data-day="${i}">
+                ${DAY_LABELS[i]}
+              </button>
+            `).join('')}
+          </div>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+
+    container.querySelectorAll('.week-cell').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = Number(btn.dataset.id);
+        const day = Number(btn.dataset.day);
+        const habit = habits.find(h => h.id === id);
+        habit.week[day] = !habit.week[day];
+        renderAll();
+      });
+    });
+
+    container.querySelectorAll('.delete-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = Number(btn.dataset.id);
+        habits = habits.filter(h => h.id !== id);
+        renderAll();
+      });
+    });
+  }
+
+  function renderAll() {
+    renderDayDots();
+    renderStats();
+    renderHabits();
+  }
+
+  $('#today-label').textContent = todayLabel();
+
+  $('#theme-toggle').addEventListener('click', () => {
+    const current = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+    const next = current === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('zuri-habit-tracker-theme', next);
+  });
+
+  $('#add-habit-btn').addEventListener('click', () => {
+    $('#add-panel').hidden = false;
+    $('#f-name').focus();
+  });
+
+  $('#cancel-add').addEventListener('click', () => {
+    $('#add-panel').hidden = true;
+    $('#f-name').value = '';
+  });
+
+  $('#save-add').addEventListener('click', () => {
+    const name = $('#f-name').value.trim();
+    if (!name) return;
+    habits.push({ id: Date.now(), name, week: new Array(7).fill(false) });
+    $('#f-name').value = '';
+    $('#add-panel').hidden = true;
+    renderAll();
+  });
+
+  renderAll();
+})();
+</script>
+
+</body>
+</html>
