@@ -30,9 +30,13 @@ For the html file, just double click it or drag it into your browser. Everything
 
 For the React component, drop it into an existing React and Tailwind project, merge the tailwind config into your own, and import lucide react for the icons it uses.
 
+<<<<<<< HEAD
 ## Why it changed from the original
 
 The first version was dark, mono spaced, more like a dashboard. This one reads more like a page from a magazine, softer, with the serif type doing most of the personality work instead of neon green glows. Same habits, same streaks, same scoring idea underneath, just presented in a calmer, warmer way.
+=======
+
+>>>>>>> 83dbfd7d43222a5adf6cbde9163db74d94a98422
 
 ## Built by
 
